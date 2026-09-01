@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Image to PDF Converter Online - Fast & Secure</title>
+    <meta name="description" content="Convert JPG, PNG images to PDF format instantly online for free. Fast, secure, and easy-to-use client-side image to PDF converter tool.">
+    <meta name="robots" content="index, follow">
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white py-4 shadow-md">
+        <div class="max-w-xl mx-auto px-4 text-center">
+            <h1 class="text-2xl font-bold">Image to PDF Converter</h1>
+            <p class="text-xs text-indigo-200 mt-1">Convert your images into a single PDF instantly</p>
+        </div>
+    </header>
+
+    <!-- Main Tool Container -->
+    <main class="max-w-xl mx-auto px-4 py-8 w-full flex-grow">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
+            
+            <label class="block w-full border-2 border-dashed border-indigo-300 rounded-lg p-6 cursor-pointer hover:bg-indigo-50 transition">
+                <span class="text-slate-600 font-medium">Choose Images (JPG, PNG)</span>
+                <input type="file" id="imageInput" multiple accept="image/*" class="hidden">
+            </label>
+
+            <!-- Preview Area -->
+            <div id="previewContainer" class="grid grid-cols-3 gap-3 mt-4"></div>
+
+            <!-- Convert Button -->
+            <button id="convertBtn" onclick="convertToPDF()" class="mt-6 w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition hidden">
+                Download PDF
+            </button>
+        </div>
+
+        <!-- Adsterra Ad Integration Slot -->
+        <div class="mt-8 text-center">
+            <!-- Yahan apna Adsterra script code paste karein -->
+            <p class="text-xs text-slate-400">[Ad Space]</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        &copy; 2026 Image to PDF Tool. All rights reserved.
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const convertBtn = document.getElementById('convertBtn');
+        let uploadedFiles = [];
+
+        imageInput.addEventListener('change', (e) => {
+            uploadedFiles = Array.from(e.target.files);
+            previewContainer.innerHTML = '';
+            
+            if (uploadedFiles.length > 0) {
+                convertBtn.classList.remove('hidden');
+                uploadedFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const div = document.createElement('div');
+                        div.className = 'relative border rounded overflow-hidden h-24 bg-slate-100 flex items-center justify-center';
+                        div.innerHTML = `<img src="${event.target.result}" class="object-cover h-full w-full">`;
+                        previewContainer.appendChild(div);
+                    }
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                convertBtn.classList.add('hidden');
+            }
+        });
+
+        async function convertToPDF() {
+            if (uploadedFiles.length === 0) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            for (let i = 0; i < uploadedFiles.length; i++) {
+                const file = uploadedFiles[i];
+                const base64Data = await toBase64(file);
+                
+                if (i > 0) doc.addPage();
+                
+                const imgProps = doc.getImageProperties(base64Data);
+                const pdfWidth = doc.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                doc.addImage(base64Data, 'JPEG', 0, 10, pdfWidth, pdfHeight);
+            }
+
+            doc.save("converted-images.pdf");
+        }
+
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    </script>
+</body>
+</html>
